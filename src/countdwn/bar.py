@@ -13,31 +13,39 @@ class Loading:
         self._thread = Thread(target=self.bar, daemon=True)
         self.user_wait_time = user_wait_time
         self.start_time = time.perf_counter()
+        # self.in_progress = True
 
-    def start(self):
+    def start(self) -> None:
         try:
             self._thread.start()
 
             # wait specified time
             time.sleep(self.user_wait_time)
 
-            # TODO: add feedback msg at end of countdown!
-
-            # at end, show cursor, bell and flush print
-            print("\r\033[?25h\r\a", end="", flush=True)
-            # BUG: "\a" should be bell, check it works...
+            self.end()
 
         # on interrupt, clear and show cursor
         except KeyboardInterrupt:
             print("\r\033[?25h\r", end="", flush=True)
 
+    def end(self) -> None:
+        # self.in_progress = False
+        # BUG: "\a" should be bell, check it works on different systems
+        print("\r\033[?25h\r\a", end="", flush=True)
+
+        print(f"Countdown completed ({f_secs(self.user_wait_time)})\033[K")
+        # /033[K to flush end of line
+
+        # return self.in_progress
+
     # calculate time remaining
-    def time_remaining(self):
+    def time_remaining(self) -> float:
         time_remain = self.user_wait_time - (time.perf_counter() - self.start_time)
         return round(time_remain, 2)
 
-    def bar(self):
+    def bar(self) -> None:
         # bar length and scaling (i.e. how long a block is worth)
+        # TODO: make bar_size user definable through --size arg?
         bar_size = 40
         tic_scale = self.user_wait_time / bar_size
 
@@ -58,13 +66,16 @@ class Loading:
                 message = "\033[31m" + message + "\033[0m"
 
             # extra whitespave before \r to overwrite countdown when less than 1 hour
+            # TODO: check if "/033[K" will work here instead of whitespace
             print(f" {message}        \r", end="", flush=True)
 
             time.sleep(self.delta_increment)
 
+        self.end()
+
 
 def f_secs(seconds: int) -> str:
-
+    # format sedonds in [hh:]mm:ss string
     hrs = int(seconds / 3600)
     seconds -= 3600 * hrs
     mins = int(seconds / 60)
