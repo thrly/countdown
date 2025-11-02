@@ -3,20 +3,20 @@ import argparse
 from countdwn.timeconversion import time_to_seconds
 
 
-def main():
+def main() -> None:
 
     # arg parser to get positional duration arg
     parser = argparse.ArgumentParser(description="Countdown timer with progress bar")
     parser.add_argument(
         "duration",
         nargs="?",
-        default=10,
+        default="10",
         type=str,
-        help="countdown time in seconds",
+        help="countdown time in seconds or [hh:]mm:ss",
     )
     args = parser.parse_args()
 
-    # TODO: allow user to input seconds or hh:mm:ss format
+    # allow user to input seconds or [hh:]mm:ss format
     countdown_time = time_to_seconds(args.duration)
 
     # now make the progress bar/timer
